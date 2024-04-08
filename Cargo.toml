@@ -1,0 +1,33 @@
+[package]
+name = "wakatime-lsp"
+description = "A simple LSP wround wakatime-cli to send code tracking heartbeats"
+repository = "https://github.com/mrnossiom/wakatime-lsp"
+readme = "https://github.com/mrnossiom/wakatime-lsp"
+keywords = ["lsp", "wakatime"]
+categories = ["development-tools"]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_json = "1.0.114"
+tokio = { version = "1.37.0", features = ["io-std", "macros", "process", "rt"] }
+tower-lsp = "0.20.0"
+tracing = "0.1.40"
+tracing-appender = "0.2.3"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+
+[lints]
+[lints.clippy]
+pedantic = "warn"
+nursery = "warn"
+# cargo = "warn"
+
+dbg_macro = "warn"
+missing_docs_in_private_items = "warn"
+todo = "warn"
+unwrap_used = "warn"
+[lints.rustdoc]
+all = "warn"
