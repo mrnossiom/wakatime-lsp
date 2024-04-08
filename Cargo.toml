@@ -1,6 +1,6 @@
 [package]
 name = "wakatime-lsp"
-description = "A simple LSP wround wakatime-cli to send code tracking heartbeats"
+description = "A dead-simple LSP around wakatime-cli to send code tracking heartbeats"
 repository = "https://github.com/mrnossiom/wakatime-lsp"
 readme = "https://github.com/mrnossiom/wakatime-lsp"
 keywords = ["lsp", "wakatime"]

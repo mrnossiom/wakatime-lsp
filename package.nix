@@ -1,4 +1,12 @@
-{ lib, rustPlatform, gitignore }:
+{ lib
+, gitignore
+
+, rustPlatform
+, makeWrapper
+, wakatime
+}:
+
+with lib;
 
 let
   inherit (gitignore.lib) gitignoreSource;
@@ -14,8 +22,13 @@ rustPlatform.buildRustPackage {
 
   cargoLock = { lockFile = "${src}/Cargo.lock"; };
 
-  nativeBuildInputs = [ ];
+  nativeBuildInputs = [ makeWrapper ];
   buildInputs = [ ];
+
+  postFixup = ''
+    wrapProgram $out/bin/wakatime-lsp \
+      --suffix PATH : ${makeBinPath [ wakatime ]}
+  '';
 
   meta = {
     inherit (cargoTOML.package) description homepage license;
