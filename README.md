@@ -1,32 +1,36 @@
 # Wakatime LSP
 
-A dead-simple LSP around wakatime-cli to send code tracking heartbeats
+<p align="center"><strong>
+A dead-simple LSP around <code>wakatime-cli</code> to send code tracking heartbeats
+</strong></p>
+
 
 I made this LSP wrapper implementation around `wakatime-cli` because I wanted support for WakaTime in [Helix](https://github.com/helix-editor/helix). Yet, it's supposed to be compatible with every LSP implementations.
 
 ## Installation
 
 <details>
-  <summary>With `cargo`</summary>
+  <summary>With <code>cargo</code></summary>
 
-While `wakatime-lsp` seems to work fine for my use case right now, I don't want to publish on `crates.io` rightaway.
+Install from repository with cargo:
 
 ```sh
 cargo install --git https://github.com/mrnossiom/wakatime-lsp
 ```
 
-You will also need `wakatime-cli` in path which you can download here:
+While `wakatime-lsp` seems to work fine for my use case right now, I don't want to publish on `crates.io` rightaway.
 
-- https://repology.org/project/wakatime/versions
-- https://repology.org/project/wakatime-cli/versions
-- or from WakaTime repository artefacts if your package manager does not bundle wakatime: https://github.com/wakatime/wakatime-cli/releases/latest
+You will also need `wakatime-cli` in path which you can download:
+
+- With you prefered package manager at [`wakatime` repology](https://repology.org/project/wakatime/versions) or [`wakatime-cli` repology](https://repology.org/project/wakatime-cli/versions)
+- or from [WakaTime repository artefacts](https://github.com/wakatime/wakatime-cli/releases/latest)
 
 </details>
 
 <details>
-  <summary>With `nix` flakes</summary>
+  <summary>With <code>nix</code> flakes</summary>
 
-A `nix` package is available which means that you can use `github:mrnossiom/wakatime-lsp` as a flake identifier
+A `flake.nix` is available which means that you can use `github:mrnossiom/wakatime-lsp` as a flake identifier, so you can.
 
 - import this repository in your flake inputs
 
@@ -39,11 +43,15 @@ A `nix` package is available which means that you can use `github:mrnossiom/waka
 
   Add the package to your [NixOS](https://nixos.org/) or [Home Manager](https://github.com/nix-community/home-manager) packages depending on your installation.
 
-- with `nix shell/run/profile` for imperative installation.
+- use with `nix shell`/`nix run` for temporary testing
 
   e.g. `nix shell github:mrnossiom/wakatime-lsp`
 
+- use with `nix profile` for imperative installation
 
+  e.g. `nix shell github:mrnossiom/wakatime-lsp`
+
+Package is reachable under `packages.${system}.default` or `packages.${system}.wakatime-lsp`.
 
 </details>
 
@@ -51,21 +59,22 @@ A `nix` package is available which means that you can use `github:mrnossiom/waka
 
 Currently `wakatime-lsp` is not configurable cause it's more of a simple `wakatime-cli` wrapper which itself is configurable with [`$WAKATIME_HOME/.wakatime.cfg`](https://github.com/wakatime/wakatime-cli/blob/develop/USAGE.md#ini-config-file).
 
-The only required configuration is `$WAKATIME_HOME/.wakatime.cfg` which must contain at least:
+Required configuration is to set your [WakaTime api key](https://wakatime.com/settings/api-key) in `$WAKATIME_HOME/.wakatime.cfg`, like so:
 
-```toml
+```ini
 [settings]
-# You can find your WakaTime api key at https://wakatime.com/settings/api-key
-api_key=
+api_key=waka_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-Though it might be already filled if you've used another wakatime plugin in the past.
+It might be already filled if you've used another wakatime plugin in the past.
 
 ## Usage
 
 ### Helix
 
-You can add this to your Helix `languages.toml` configuration. Currently, configuration does not make it possible to add global LSPs. See [new config system PR](https://github.com/helix-editor/helix/pull/9318).
+You can add `wakatime-lsp` to your `languages.toml` configuration. Currently, it's possible to add global LSPs. You can add `wakatime` for significant languages. See [new Helix config system PR](https://github.com/helix-editor/helix/pull/9318).
+
+e.g.
 
 ```toml
 [language-server.wakatime]
