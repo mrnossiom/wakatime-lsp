@@ -1,5 +1,6 @@
 //! Wakatime LSP
-//! <https://github.com/wakatime/wakatime-cli/blob/develop/USAGE.md#ini-config-file>
+
+// TODO: check options for additional ideas <https://github.com/wakatime/wakatime-cli/blob/develop/USAGE.md#ini-config-file>
 
 // TODO: implement debounding ourselves to avoid wkcli roundtrips
 // TODO: read wakatime config
@@ -12,7 +13,7 @@ use std::{
 };
 use tokio::process::Command;
 use tower_lsp::{
-	jsonrpc::Result,
+	jsonrpc::{Error, Result},
 	lsp_types::{
 		DidChangeTextDocumentParams, DidCloseTextDocumentParams, DidOpenTextDocumentParams,
 		DidSaveTextDocumentParams, ExecuteCommandOptions, ExecuteCommandParams, InitializeParams,
@@ -143,13 +144,23 @@ impl LanguageServer for Backend {
 					.arg("--today")
 					.output()
 					.await
-					.unwrap();
+					.map_err(|e| {
+						tracing::error!("While executing `wakatime-cli`: {e}");
+						Error::internal_error()
+					})?;
 
-				let time_past = output.stdout.lines().next().unwrap().unwrap();
+				let Some(Ok(time_past)) = output.stdout.lines().next() else {
+					tracing::error!("");
+					return Err(Error::internal_error());
+				};
 
 				self.client.show_message(MessageType::INFO, time_past).await;
 			}
-			_ => todo!(),
+			unknown_cmd_id => {
+				let message = format!("Unknown workspace command received: `{unknown_cmd_id}`");
+				tracing::error!(message);
+				self.client.log_message(MessageType::ERROR, &message).await;
+			}
 		};
 
 		Ok(None)
