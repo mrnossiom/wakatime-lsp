@@ -1,15 +1,13 @@
 [package]
 name = "wakatime-lsp"
-description = "A dead-simple LSP around wakatime-cli to send code tracking heartbeats"
-repository = "https://github.com/mrnossiom/wakatime-lsp"
-readme = "https://github.com/mrnossiom/wakatime-lsp"
-keywords = ["lsp", "wakatime"]
-categories = ["development-tools"]
 version = "0.1.0"
 edition = "2021"
-license = "MIT"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "A dead-simple LSP around wakatime-cli to send code tracking heartbeats"
+repository = "https://github.com/mrnossiom/wakatime-lsp"
+keywords = ["lsp", "wakatime"]
+categories = ["development-tools"]
+license = "CECILL-2.1"
 
 [dependencies]
 serde_json = "1.0.114"
