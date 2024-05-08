@@ -11,7 +11,7 @@ use std::{
 	io::BufRead,
 	panic::{self, PanicInfo},
 };
-use tokio::process::Command;
+use tokio::{process::Command, sync::RwLock};
 use tower_lsp::{
 	jsonrpc::{Error, Result},
 	lsp_types::{
@@ -30,25 +30,34 @@ const OPEN_DASHBOARD_ACTION: &str = "open_dashboard";
 /// Log the time past today in an editor
 const SHOW_TIME_PAST_ACTION: &str = "show_time_past";
 
+/// Base plugin user agent
+const PLUGIN_USER_AGENT: &str = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
+
 /// Implements [`LanguageServer`] to interact with an editor
 #[derive(Debug)]
 struct Backend {
 	/// Interface for sending LSP notifications to the client
 	client: Client,
+
+	/// Editor and LSP user agent for `wakatime-cli`
+	user_agent: RwLock<String>,
 }
 
 impl Backend {
 	/// Creates a new [`Backend`]
-	const fn new(client: Client) -> Self {
-		Self { client }
+	fn new(client: Client) -> Self {
+		Self {
+			client,
+			user_agent: RwLock::new(PLUGIN_USER_AGENT.into()),
+		}
 	}
 
 	#[tracing::instrument(skip_all)]
 	async fn on_change(&self, uri: Url, is_write: bool) {
 		let mut cmd = Command::new("wakatime-cli");
 
-		let user_agent = concat!(env!("CARGO_PKG_NAME"), "/", env!("CARGO_PKG_VERSION"));
-		cmd.args(["--plugin", user_agent]);
+		let user_agent = self.user_agent.read().await;
+		cmd.args(["--plugin", &user_agent]);
 
 		cmd.args(["--entity", uri.path()]);
 
@@ -82,7 +91,19 @@ impl Backend {
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
 	#[tracing::instrument(skip_all)]
-	async fn initialize(&self, _params: InitializeParams) -> Result<InitializeResult> {
+	async fn initialize(&self, params: InitializeParams) -> Result<InitializeResult> {
+		if let Some(info) = params.client_info {
+			let mut ua = self.user_agent.write().await;
+
+			*ua = format!(
+				"{}/{} {}",
+				info.name,
+				info.version
+					.map_or_else(|| "unknown".into(), |version| version),
+				PLUGIN_USER_AGENT
+			);
+		};
+
 		Ok(InitializeResult {
 			server_info: Some(ServerInfo {
 				name: env!("CARGO_PKG_NAME").into(),
@@ -101,8 +122,9 @@ impl LanguageServer for Backend {
 		})
 	}
 
-	#[tracing::instrument(skip_all)]
-	async fn initialized(&self, _: InitializedParams) {}
+	async fn initialized(&self, _: InitializedParams) {
+		tracing::info!("client `{}` initialized", PLUGIN_USER_AGENT);
+	}
 
 	#[tracing::instrument(skip_all)]
 	async fn shutdown(&self) -> Result<()> {
