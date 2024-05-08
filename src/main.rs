@@ -96,11 +96,21 @@ impl LanguageServer for Backend {
 			let mut ua = self.user_agent.write().await;
 
 			*ua = format!(
-				"{}/{} {}",
+				"{}/{} {} {}-wakatime/{}",
+				// Editor part
 				info.name,
 				info.version
-					.map_or_else(|| "unknown".into(), |version| version),
-				PLUGIN_USER_AGENT
+					.as_ref()
+					.map_or_else(|| "unknown", |version| version),
+				// Plugin part
+				PLUGIN_USER_AGENT,
+				// Last part is the one parsed by `wakatime` servers
+				// It follows `{editor}-wakatime/{version}` where `editor` is
+				// registered in intern. Works when `info.name` matches what the
+				// wakatime dev choose.
+				// IDEA: rely less on luck
+				info.name,
+				env!("CARGO_PKG_VERSION"),
 			);
 		};
 
