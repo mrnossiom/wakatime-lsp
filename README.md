@@ -5,7 +5,7 @@ A dead-simple LSP around <code>wakatime-cli</code> to send code tracking heartbe
 </strong></p>
 
 
-I made this LSP wrapper implementation around `wakatime-cli` because I wanted support for WakaTime in [Helix](https://github.com/helix-editor/helix). Yet, it's supposed to be compatible with every LSP implementations.
+I made this LSP wrapper implementation around `wakatime-cli` because I wanted support for WakaTime in [Helix](https://github.com/helix-editor/helix). That said, it's should be compatible with every LSP implementations.
 
 ## Installation
 
@@ -49,7 +49,7 @@ A `flake.nix` is available which means that you can use `github:mrnossiom/wakati
 
 - use with `nix profile` for imperative installation
 
-  e.g. `nix shell github:mrnossiom/wakatime-lsp`
+  e.g. `nix profile install github:mrnossiom/wakatime-lsp`
 
 Package is reachable under `packages.${system}.default` or `packages.${system}.wakatime-lsp`.
 
