@@ -1,9 +1,8 @@
-# Wakatime LSP
+# Wakatime LSP ![Nix Powered](https://img.shields.io/badge/Nix-Powered-blue?logo=nixos) [![Cachix Cache](https://img.shields.io/badge/cachix-mrnossiom-blue.svg)](https://mrnossiom.cachix.org)
 
 <p align="center"><strong>
 A dead-simple LSP around <code>wakatime-cli</code> to send code tracking heartbeats
 </strong></p>
-
 
 I made this LSP wrapper implementation around `wakatime-cli` because I wanted support for WakaTime in [Helix](https://github.com/helix-editor/helix). That said, it's should be compatible with every LSP implementations.
 
@@ -51,7 +50,7 @@ A `flake.nix` is available which means that you can use `github:mrnossiom/wakati
 
   e.g. `nix profile install github:mrnossiom/wakatime-lsp`
 
-Package is reachable under `packages.${system}.default` or `packages.${system}.wakatime-lsp`.
+Package is reachable through `packages.${system}.default` or `packages.${system}.wakatime-lsp`.
 
 </details>
 
