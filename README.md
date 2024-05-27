@@ -1,8 +1,21 @@
-# Wakatime LSP ![Nix Powered](https://img.shields.io/badge/Nix-Powered-blue?logo=nixos) [![Cachix Cache](https://img.shields.io/badge/cachix-mrnossiom-blue.svg)](https://mrnossiom.cachix.org)
+# Wakatime LSP
 
 <p align="center"><strong>
 A dead-simple LSP around <code>wakatime-cli</code> to send code tracking heartbeats
 </strong></p>
+
+<p align="center">
+  <img alt="Nix Powered" src="https://img.shields.io/badge/Nix-Powered-blue?logo=nixos" />
+  <a href="https://mrnossiom.cachix.org">
+    <img alt="Cachix Cache" src="https://img.shields.io/badge/cachix-mrnossiom-blue.svg" />
+  </a>
+  <a href="https://wakatime.com/badge/github/mrnossiom/wakatime-lsp">
+    <img alt="Time spent on wakatime-lsp" src="https://wakatime.com/badge/github/mrnossiom/wakatime-lsp.svg" />
+  </a>
+  <a href="https://discord.gg/GrbpRNza5j">
+    <img alt="Join support Discord" src="https://img.shields.io/badge/Support-Join-3178C6?style=social&logo=Discord" />
+  </a>
+</p>
 
 I made this LSP wrapper implementation around `wakatime-cli` because I wanted support for WakaTime in [Helix](https://github.com/helix-editor/helix). That said, it's should be compatible with every LSP implementations.
 
