@@ -71,7 +71,7 @@ It might be already filled if you've used another wakatime plugin in the past.
 
 ### Helix
 
-You can add `wakatime-lsp` to your `languages.toml` configuration. Currently, it's possible to add global LSPs. You can add `wakatime` for significant languages. See [new Helix config system PR](https://github.com/helix-editor/helix/pull/9318).
+You can add `wakatime-lsp` to your `languages.toml` configuration. Though, it's currently possible to add global LSPs, you can add `wakatime` for significant languages. Adding global LSPs is blocking on [Helix's new config system](https://github.com/helix-editor/helix/pull/9318).
 
 e.g.
 
