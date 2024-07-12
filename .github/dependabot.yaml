@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "cargo"
+    directory: "."
+    schedule:
+      interval: "monthly"
+      day: "monday"
+    groups:
+      rs-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+    groups:
+      gh-dependency:
+        patterns:
+          - "*"
