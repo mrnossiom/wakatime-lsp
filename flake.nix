@@ -52,6 +52,8 @@
               rust-toolchain
               act
 
+              # cargo-dist
+
               wakatime
             ];
             buildInputs = with pkgs; [ ];
