@@ -11,6 +11,7 @@ use serde_json::Value;
 use std::env;
 use std::fs::File;
 use std::io::{copy, Cursor};
+use std::path::PathBuf;
 use std::{
 	io::BufRead,
 	panic::{self, PanicInfo},
@@ -73,8 +74,8 @@ impl Backend {
 	}
 
 	#[tracing::instrument(skip_all)]
-	async fn on_change(&self, uri: Url, is_write: bool) {
-		let mut cmd = Command::new("wakatime-cli");
+	async fn on_change(&self, uri: Url, is_write: bool) -> Result<()> {
+		let mut cmd = Command::new(wakatime_cli_path()?);
 
 		let user_agent = self.user_agent.read().await;
 		cmd.args(["--plugin", &user_agent]);
@@ -105,6 +106,8 @@ impl Backend {
 			}
 			_ => {}
 		};
+		
+		Ok(())
 	}
 }
 
@@ -112,7 +115,7 @@ impl Backend {
 impl LanguageServer for Backend {
 	#[tracing::instrument(skip_all)]
 	async fn initialize(&self, params: InitializeParams) -> Result<InitializeResult> {
-		install_wakatime_cli_if_missing().await?;
+		install_wakatime_cli().await?;
 
 		if let Some(info) = params.client_info {
 			let mut ua = self.user_agent.write().await;
@@ -194,7 +197,7 @@ impl LanguageServer for Backend {
 					.await?;
 			}
 			SHOW_TIME_PAST_ACTION => {
-				let output = Command::new("wakatime-cli")
+				let output = Command::new(wakatime_cli_path()?)
 					.arg("--today")
 					.output()
 					.await
@@ -245,8 +248,27 @@ fn tracing_panic_hook(panic_info: &PanicInfo) {
 	);
 }
 
-async  fn install_wakatime_cli_if_missing() -> Result<()> {
-	if which::which("wakatime-cli").is_ok() {
+fn wakatime_cli_path() -> Result<PathBuf> {
+	// Check if ~/.wakatime/wakatime-cli exists
+	homedir::my_home()
+		.map_err(|e| Error {
+			code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+			data: None,
+			message: std::borrow::Cow::Owned(format!("Could not get home directory: {e:?}")),
+		})
+		.and_then(|home| {
+			home.ok_or(Error {
+				code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+				data: None,
+				message: std::borrow::Cow::Borrowed("Could not get home directory"),
+			})
+			.map(|home| home.join(".wakatime").join("wakatime-cli"))
+		})
+}
+
+async fn install_wakatime_cli() -> Result<()> {
+	let wakatime_cli_binary_path = wakatime_cli_path()?;
+	if wakatime_cli_binary_path.exists() {
 		tracing::debug!("wakatime-cli is already installed");
 		return Ok(());
 	}
@@ -306,14 +328,8 @@ async  fn install_wakatime_cli_if_missing() -> Result<()> {
 		)),
 	})?;
 
-	let output_filepath = env::current_exe()
-		.expect("Could not get current executable path")
-		.parent()
-		.expect("Could not get parent directory of current executable path")
-		.join("wakatime-cli");
-
-	// Create the output file, store it next to the current executable
-	let mut output_file = File::create(&output_filepath).map_err(|e| Error {
+	// Create the output binary file at ~/.wakatime/wakatime-cli
+	let mut output_file = File::create(&wakatime_cli_binary_path).map_err(|e| Error {
 		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
 		data: None,
 		message: std::borrow::Cow::Owned(format!(
@@ -321,7 +337,7 @@ async  fn install_wakatime_cli_if_missing() -> Result<()> {
 		)),
 	})?;
 
-	tracing::debug!("Writing binary to {output_filepath:?}");
+	tracing::debug!("Writing binary to {wakatime_cli_binary_path:?}");
 
 	// Copy the contents of the zip file to the output file
 	copy(&mut file, &mut output_file).map_err(|e| Error {
