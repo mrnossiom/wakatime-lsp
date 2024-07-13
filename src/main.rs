@@ -319,11 +319,8 @@ async fn install_wakatime_cli() -> Result<()> {
 	let download_url = format!("https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-{WAKATIME_CLI_RELEASE_FILE_PLATFORM}-{WAKATIME_CLI_RELEASE_FILE_ARCH}.zip");
 	tracing::info!("Downloading wakatime-cli from {download_url}");
 
-	// Create a HTTP client
-	let client = HttpClient::new();
-
 	// Send a GET request to download the file
-	let response = client.get(&download_url).send().await.map_err(|e| Error {
+	let response = HttpClient::new().get(&download_url).send().await.map_err(|e| Error {
 		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
 		data: None,
 		message: std::borrow::Cow::Owned(format!("Failed to download wakatime-cli: {e}")),
