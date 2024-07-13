@@ -106,7 +106,7 @@ impl Backend {
 			}
 			_ => {}
 		};
-		
+
 		Ok(())
 	}
 }
@@ -266,9 +266,52 @@ fn wakatime_cli_path() -> Result<PathBuf> {
 		})
 }
 
+async fn wakatime_cli_is_up_to_date() -> bool {
+	if !wakatime_cli_path().map_or(false, |path| path.exists()) {
+		return false;
+	}
+
+	// Get current installed version
+	let installed_tag_maybe = Command::new(wakatime_cli_path().unwrap()) // unwrap is safe, we checked for the path previously
+		.arg("--version")
+		.output()
+		.await
+		.map(|o| match o.stdout.lines().next() {
+			Some(Ok(version)) => Ok(format!("v{version}")),
+			_ => Err(Error {
+				code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+				data: None,
+				message: std::borrow::Cow::Borrowed("Could not get wakatime-cli version"),
+			}),
+		});
+
+	// Get latest release git tag with the Github API
+	if let Ok(response) = HttpClient::new()
+		.get("https://api.github.com/repos/wakatime/wakatime-cli/releases/latest")
+		.send()
+		.await
+	{
+		// One day `if let (...) = ... && ...` will be stabilized...
+		if response.status().is_success() {
+			if let Ok(json) = response.bytes().await {
+				if let Ok(Ok(installed_tag)) = installed_tag_maybe {
+					let release: Value = serde_json::from_slice(&json).expect(
+						"JSON from github api while checking for wakatime-cli version is invalid",
+					);
+					let tag_name = release["tag_name"]
+						.as_str()
+						.expect("tag name of release from github api is not a string");
+					return tag_name == installed_tag;
+				}
+			}
+		}
+	}
+	false
+}
+
 async fn install_wakatime_cli() -> Result<()> {
 	let wakatime_cli_binary_path = wakatime_cli_path()?;
-	if wakatime_cli_binary_path.exists() {
+	if wakatime_cli_binary_path.exists() && wakatime_cli_is_up_to_date().await {
 		tracing::debug!("wakatime-cli is already installed");
 		return Ok(());
 	}
