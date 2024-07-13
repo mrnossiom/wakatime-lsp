@@ -10,12 +10,15 @@ categories = ["development-tools"]
 license = "CECILL-2.1"
 
 [dependencies]
+reqwest = "0.12.5"
 serde_json = "1.0.114"
 tokio = { version = "1.37.0", features = ["io-std", "macros", "process", "rt"] }
 tower-lsp = "0.20.0"
 tracing = "0.1.40"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+which = "6.0.1"
+zip = "2.1.3"
 
 [lints]
 [lints.rust]
@@ -40,5 +43,10 @@ lto = "thin"
 cargo-dist-version = "0.19.1"
 ci = "github"
 installers = []
-targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+targets = [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "x86_64-unknown-linux-gnu",
+    "x86_64-pc-windows-msvc",
+]
 pr-run-mode = "plan"

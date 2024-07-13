@@ -6,7 +6,11 @@
 // TODO: read wakatime config
 // TODO: do not log when out of dev folder
 
+use reqwest::Client as HttpClient;
 use serde_json::Value;
+use std::env;
+use std::fs::File;
+use std::io::{copy, Cursor};
 use std::{
 	io::BufRead,
 	panic::{self, PanicInfo},
@@ -24,6 +28,22 @@ use tower_lsp::{
 	Client, LanguageServer, LspService, Server,
 };
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
+use zip::read::ZipArchive;
+
+#[cfg(target_os = "macos")]
+static WAKATIME_CLI_RELEASE_FILE_PLATFORM: &str = "darwin";
+
+#[cfg(target_os = "linux")]
+static WAKATIME_CLI_RELEASE_FILE_PLATFORM: &str = "linux";
+
+#[cfg(target_os = "windows")]
+static WAKATIME_CLI_RELEASE_FILE_PLATFORM: &str = "windows";
+
+#[cfg(target_arch = "x86_64")]
+static WAKATIME_CLI_RELEASE_FILE_ARCH: &str = "amd64";
+
+#[cfg(target_arch = "aarch64")]
+static WAKATIME_CLI_RELEASE_FILE_ARCH: &str = "arm64";
 
 /// Open the Wakatime web dashboard in a browser
 const OPEN_DASHBOARD_ACTION: &str = "open_dashboard";
@@ -92,6 +112,8 @@ impl Backend {
 impl LanguageServer for Backend {
 	#[tracing::instrument(skip_all)]
 	async fn initialize(&self, params: InitializeParams) -> Result<InitializeResult> {
+		install_wakatime_cli_if_missing().await?;
+
 		if let Some(info) = params.client_info {
 			let mut ua = self.user_agent.write().await;
 
@@ -221,6 +243,96 @@ fn tracing_panic_hook(panic_info: &PanicInfo) {
 		panic.location = location,
 		"A panic occurred",
 	);
+}
+
+async  fn install_wakatime_cli_if_missing() -> Result<()> {
+	if which::which("wakatime-cli").is_ok() {
+		tracing::debug!("wakatime-cli is already installed");
+		return Ok(());
+	}
+
+	let download_url = format!("https://github.com/wakatime/wakatime-cli/releases/latest/download/wakatime-cli-{WAKATIME_CLI_RELEASE_FILE_PLATFORM}-{WAKATIME_CLI_RELEASE_FILE_ARCH}.zip");
+	tracing::info!("Downloading wakatime-cli from {download_url}");
+
+	// Create a HTTP client
+	let client = HttpClient::new();
+
+	// Send a GET request to download the file
+	let response = client.get(&download_url).send().await.map_err(|e| Error {
+		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+		data: None,
+		message: std::borrow::Cow::Owned(format!("Failed to download wakatime-cli: {e}")),
+	})?;
+
+	// Ensure the request was successful
+	if !response.status().is_success() {
+		let status_code = response.status();
+		return Err(Error {
+			code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+			message: std::borrow::Cow::Owned(format!(
+				"Failed to download wakatime-cli: got HTTP {status_code} on {download_url}"
+			)),
+			data: None,
+		});
+	}
+
+	// Read the response body into a Vec<u8>
+	let bytes = response.bytes().await.map_err(|e| Error {
+		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+		data: None,
+		message: std::borrow::Cow::Owned(format!(
+			"While downloading wakatime-cli: failed to read response body: {e}"
+		)),
+	})?;
+	let reader = Cursor::new(bytes);
+
+	tracing::debug!("Extracting wakatime-cli from zip archive");
+
+	// Create a ZipArchive from the response body
+	let mut archive = ZipArchive::new(reader).map_err(|e| Error {
+		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+		data: None,
+		message: std::borrow::Cow::Owned(format!(
+			"While downloading wakatime-cli: could not parse zip archive: {e}"
+		)),
+	})?;
+
+	// Extract the first (and presumably only) file from the archive
+	let mut file = archive.by_index(0).map_err(|e| Error {
+		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+		data: None,
+		message: std::borrow::Cow::Owned(format!(
+			"While downloading wakatime-cli: archive has no files (or is corrupted): {e}"
+		)),
+	})?;
+
+	let output_filepath = env::current_exe()
+		.expect("Could not get current executable path")
+		.parent()
+		.expect("Could not get parent directory of current executable path")
+		.join("wakatime-cli");
+
+	// Create the output file, store it next to the current executable
+	let mut output_file = File::create(&output_filepath).map_err(|e| Error {
+		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+		data: None,
+		message: std::borrow::Cow::Owned(format!(
+			"While downloading wakatime-cli: could not create output file: {e}"
+		)),
+	})?;
+
+	tracing::debug!("Writing binary to {output_filepath:?}");
+
+	// Copy the contents of the zip file to the output file
+	copy(&mut file, &mut output_file).map_err(|e| Error {
+		code: tower_lsp::jsonrpc::ErrorCode::InternalError,
+		data: None,
+		message: std::borrow::Cow::Owned(format!(
+			"While downloading wakatime-cli: could not write output file: {e}"
+		)),
+	})?;
+
+	Ok(())
 }
 
 // We really don't need much power with what we are doing
