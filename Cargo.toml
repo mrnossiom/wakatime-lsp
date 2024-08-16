@@ -1,6 +1,6 @@
 [package]
 name = "wakatime-lsp"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 description = "A dead-simple LSP around wakatime-cli to send code tracking heartbeats"
@@ -10,12 +10,12 @@ categories = ["development-tools"]
 license = "CECILL-2.1"
 
 [dependencies]
-serde_json = "1.0.114"
-tokio = { version = "1.37.0", features = ["io-std", "macros", "process", "rt"] }
-tower-lsp = "0.20.0"
-tracing = "0.1.40"
-tracing-appender = "0.2.3"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+serde_json = "1"
+tokio = { version = "1", features = ["io-std", "macros", "process", "rt"] }
+tower-lsp = "0.20"
+tracing = "0.1"
+tracing-appender = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [lints]
 [lints.rust]
