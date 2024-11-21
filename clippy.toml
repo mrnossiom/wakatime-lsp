@@ -1,0 +1,2 @@
+allowed-wildcard-imports = [ "lsp_types" ]
+
