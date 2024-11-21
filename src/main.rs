@@ -1,12 +1,12 @@
 //! Wakatime LS
 
-use std::panic::{self, PanicInfo};
+use std::panic::{self, PanicHookInfo};
 use tower_lsp::{LspService, Server};
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
 use wakatime_ls::Backend;
 
 /// Transfers panic messages to the tracing logging pipeline
-fn tracing_panic_hook(panic_info: &PanicInfo) {
+fn tracing_panic_hook(panic_info: &PanicHookInfo) {
 	let payload = panic_info
 		.payload()
 		.downcast_ref::<&'static str>()
