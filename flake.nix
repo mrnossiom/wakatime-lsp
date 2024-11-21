@@ -31,12 +31,12 @@
       formatter = forAllPkgs (pkgs: pkgs.nixpkgs-fmt);
 
       packages = forAllPkgs (pkgs: rec {
-        default = wakatime-lsp;
-        wakatime-lsp = pkgs.callPackage ./package.nix { inherit gitignore; };
+        default = wakatime-ls;
+        wakatime-ls = pkgs.callPackage ./package.nix { inherit gitignore; };
       });
       apps = forAllSystems (system: rec {
-        default = wakatime-lsp;
-        wakatime-lsp = mkApp (pkgs.getExe self.packages.${system}.app);
+        default = wakatime-ls;
+        wakatime-ls = mkApp (pkgs.getExe self.packages.${system}.app);
       });
 
       devShells = forAllPkgs (pkgs:

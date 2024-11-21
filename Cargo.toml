@@ -1,11 +1,11 @@
 [package]
-name = "wakatime-lsp"
+name = "wakatime-ls"
 version = "0.1.1"
 edition = "2021"
 
-description = "A dead-simple LSP around wakatime-cli to send code tracking heartbeats"
-repository = "https://github.com/mrnossiom/wakatime-lsp"
-keywords = ["lsp", "wakatime"]
+description = "A dead-simple language server around wakatime-cli to send code tracking heartbeats"
+repository = "https://github.com/mrnossiom/wakatime-ls"
+keywords = ["wakatime", "language-server", "lsp"]
 categories = ["development-tools"]
 license = "CECILL-2.1"
 

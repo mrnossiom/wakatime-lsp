@@ -1,4 +1,4 @@
-//! Wakatime LSP
+//! Wakatime LS
 
 // TODO: check options for additional ideas <https://github.com/wakatime/wakatime-cli/blob/develop/USAGE.md#ini-config-file>
 
@@ -39,7 +39,7 @@ struct Backend {
 	/// Interface for sending LSP notifications to the client
 	client: Client,
 
-	/// Editor and LSP user agent for `wakatime-cli`
+	/// Editor and LS user agent for `wakatime-cli`
 	user_agent: RwLock<String>,
 }
 
@@ -228,7 +228,7 @@ fn tracing_panic_hook(panic_info: &PanicInfo) {
 async fn main() {
 	panic::set_hook(Box::new(tracing_panic_hook));
 
-	let file_appender = tracing_appender::rolling::never("/tmp", "wakatime-lsp.log");
+	let file_appender = tracing_appender::rolling::never("/tmp", "wakatime-ls.log");
 	let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
 	tracing_subscriber::fmt()
 		.with_writer(non_blocking)

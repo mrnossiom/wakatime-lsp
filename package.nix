@@ -26,13 +26,13 @@ rustPlatform.buildRustPackage {
   buildInputs = [ ];
 
   postFixup = ''
-    wrapProgram $out/bin/wakatime-lsp \
+    wrapProgram $out/bin/wakatime-ls \
       --suffix PATH : ${makeBinPath [ wakatime ]}
   '';
 
   meta = {
     inherit (cargoTOML.package) description homepage license;
     maintainers = [ "mrnossiom" ];
-    mainProgram = "wakatime-lsp";
+    mainProgram = "wakatime-ls";
   };
 }
