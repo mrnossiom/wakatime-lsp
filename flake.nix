@@ -1,16 +1,12 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
 
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay.inputs.nixpkgs.follows = "nixpkgs";
 
-    gitignore = {
-      url = "github:hercules-ci/gitignore.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    gitignore.url = "github:hercules-ci/gitignore.nix";
+    gitignore.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, rust-overlay, gitignore }:
@@ -52,11 +48,12 @@
               rust-toolchain
               act
 
-              # cargo-dist
+              cargo-dist
 
               wakatime
             ];
-            buildInputs = with pkgs; [ ];
+
+            buildInputs = [ ];
 
             RUST_SRC_PATH = pkgs.rustPlatform.rustLibSrc;
             LD_LIBRARY_PATH = makeLibraryPath buildInputs;
