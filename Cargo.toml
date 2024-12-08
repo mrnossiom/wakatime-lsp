@@ -10,12 +10,10 @@ categories = ["development-tools"]
 license = "CECILL-2.1"
 
 [dependencies]
+lsp-server = "0.7"
+lsp-types = "0.97"
+serde = "1"
 serde_json = "1"
-tokio = { version = "1", features = ["io-std", "macros", "process", "rt"] }
-tower-lsp = "0.20"
-tracing = "0.1"
-tracing-appender = "0.2"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [lints]
 [lints.rust]
